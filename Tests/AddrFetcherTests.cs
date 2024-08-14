@@ -1,9 +1,12 @@
+using System.Text.RegularExpressions;
 using DynIpUpdater;
 
 namespace Tests
 {
-    public class AddrFetcherTests
+    public partial class AddrFetcherTests
     {
+        private readonly Regex _addrRegex = IpRegex();
+
         [Fact]
         public async Task FetchAddress_AddressReturned()
         {
@@ -11,7 +14,10 @@ namespace Tests
 
             IAddress address = await fetcher.FetchAddressAsync();
 
-            Assert.NotNull(address.Address);
+            Assert.Matches(_addrRegex, address.Address);
         }
+
+        [GeneratedRegex(@"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")]
+        private static partial Regex IpRegex();
     }
 }
