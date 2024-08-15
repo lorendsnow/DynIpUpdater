@@ -1,14 +1,17 @@
 ﻿namespace DynIpUpdater
 {
-    internal class Program
+    public class Program
     {
-        static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            IpifyFetcher fetcher = new();
+            HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-            IAddress address = await fetcher.FetchAddressAsync();
+            builder.Services.AddHostedService<UpdateService>();
+            builder.Services.AddSingleton<IAddrFetcher, IpifyFetcher>();
 
-            Console.WriteLine(address);
+            IHost host = builder.Build();
+
+            host.Run();
         }
     }
 }
