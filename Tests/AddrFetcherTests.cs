@@ -10,7 +10,8 @@ namespace Tests
         [Fact]
         public async Task FetchAddress_AddressReturned()
         {
-            IpifyFetcher fetcher = new();
+            IHttpClientFactory factory = new MockClientFactory();
+            IpifyFetcher fetcher = new(factory);
 
             IAddress address = await fetcher.FetchAddressAsync();
 
@@ -19,5 +20,13 @@ namespace Tests
 
         [GeneratedRegex(@"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")]
         private static partial Regex IpRegex();
+    }
+
+    public class MockClientFactory : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name)
+        {
+            return new() { BaseAddress = new Uri("https://api.ipify.org") };
+        }
     }
 }
