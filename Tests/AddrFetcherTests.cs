@@ -10,7 +10,7 @@ namespace Tests
         [Fact]
         public async Task FetchAddress_AddressReturned()
         {
-            AddrFetcher fetcher = new();
+            IpifyFetcher fetcher = new();
 
             IAddress address = await fetcher.FetchAddressAsync();
 
