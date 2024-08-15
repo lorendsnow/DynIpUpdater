@@ -7,7 +7,7 @@
             HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
             builder.Services.AddHostedService<UpdateService>();
-            builder.Services.AddSingleton<IAddrFetcher, IpifyFetcher>();
+            builder.Services.AddIpifyClient();
 
             IHost host = builder.Build();
 
