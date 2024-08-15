@@ -1,14 +1,12 @@
-﻿using DynIpUpdater;
+﻿using System.Net.Http.Headers;
+using DynIpUpdater;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Xunit.Abstractions;
 
 namespace Tests
 {
-    public class HttpClientExtensionTests(ITestOutputHelper helper)
+    public class HttpClientExtensionTests()
     {
-        private readonly ITestOutputHelper _helper = helper;
-
         [Fact]
         public void AddIpifyClient_ClientAdded()
         {
@@ -22,6 +20,23 @@ namespace Tests
                 .CreateClient(NamedHttpClients.IpifyFetcher.ToString());
 
             Assert.True(client.BaseAddress == new Uri("https://api.ipify.org"));
+        }
+
+        [Fact]
+        public void AddCloudflareClient_ClientAdded()
+        {
+            var builder = Host.CreateApplicationBuilder();
+
+            builder.Services.AddCloudflareClient("TEST_KEY");
+
+            var app = builder.Build();
+            using HttpClient client = app
+                .Services.GetRequiredService<IHttpClientFactory>()
+                .CreateClient(NamedHttpClients.CloudflareClient.ToString());
+
+            Assert.True(client.BaseAddress == new Uri("https://api.cloudflare.com/client/v4"));
+            Assert.True(client.DefaultRequestHeaders.Authorization?.Scheme == "Bearer");
+            Assert.True(client.DefaultRequestHeaders.Authorization?.Parameter == "TEST_KEY");
         }
     }
 }
