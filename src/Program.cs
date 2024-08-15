@@ -4,7 +4,7 @@
     {
         static async Task Main(string[] args)
         {
-            AddrFetcher fetcher = new();
+            IpifyFetcher fetcher = new();
 
             IAddress address = await fetcher.FetchAddressAsync();
 
