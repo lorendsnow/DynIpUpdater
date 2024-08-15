@@ -1,5 +1,8 @@
 ﻿namespace DynIpUpdater
 {
+    /// <summary>
+    /// Represents a request body for updating an A record in Cloudflare.
+    /// </summary>
     public record ARecord
     {
         /// <summary>
@@ -22,6 +25,7 @@
         [JsonPropertyName("proxied")]
         public bool Proxied { get; init; }
 
+        [JsonPropertyName("type")]
         public static string RecordType => "A";
 
         /// <summary>
