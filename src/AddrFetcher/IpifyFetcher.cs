@@ -3,21 +3,17 @@
     /// <summary>
     /// Implementation of <see cref="IAddrFetcher"/> which fetches the IP address from ipify.org.
     /// </summary>
-    public class AddrFetcher : IAddrFetcher
+    public class IpifyFetcher : IAddrFetcher
     {
-        /// <summary>
-        /// Client used to fetch the IP address; initialized with the base address of ipify.org.
-        /// </summary>
-        public HttpClient Client { get; } =
-            new HttpClient() { BaseAddress = new Uri("https://api.ipify.org") };
-
         /// <summary>
         /// Fetches the IP address from ipify.org.
         /// </summary>
         /// <returns>an <see cref="IAddress"/> object.</returns>
         public async Task<IAddress> FetchAddressAsync()
         {
-            return await Client.GetFromJsonAsync<IpifyAddress>("?format=json");
+            using HttpClient client = IpifyClientFactory.CreateClient();
+
+            return await client.GetFromJsonAsync<IpifyAddress>("?format=json");
         }
     }
 
