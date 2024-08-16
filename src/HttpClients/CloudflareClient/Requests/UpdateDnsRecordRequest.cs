@@ -1,15 +1,15 @@
 ﻿namespace DynIpUpdater
 {
     /// <summary>
-    /// Represents a request body for updating an A record in Cloudflare.
+    /// Represents a request body for updating an A or CNAME record in Cloudflare.
     /// </summary>
-    public record ARecord
+    public class UpdateDnsRecordRequest(string address, string name, string recordType, string id)
     {
         /// <summary>
         /// A valid IPv4 address
         /// </summary>
         [JsonPropertyName("content")]
-        public required string Address { get; init; }
+        public string Address { get; init; } = address;
 
         /// <summary>
         /// The DNS record name in punycode
@@ -17,7 +17,10 @@
         /// <remarks>Must be less than 255 characters.</remarks>
         [JsonPropertyName("name")]
         [MaxLength(255, ErrorMessage = "Name property must be less than 255 characters")]
-        public required string Name { get; init; }
+        public string Name { get; init; } =
+            name.Length <= 255
+                ? name
+                : throw new ValidationException("Name property must be less than 255 characters");
 
         /// <summary>
         /// Whether the record is receiving the performance and security benefits of Cloudflare
@@ -25,8 +28,15 @@
         [JsonPropertyName("proxied")]
         public bool Proxied { get; init; }
 
+        /// <summary>
+        /// The type of DNS record.
+        /// </summary>
+        /// <remarks>Must be one of "A" or "CNAME"</remarks>
         [JsonPropertyName("type")]
-        public static string RecordType => "A";
+        public string RecordType { get; init; } =
+            recordType == "A" || recordType == "CNAME"
+                ? recordType
+                : throw new ValidationException("RecordType must be one of 'A' or 'CNAME'");
 
         /// <summary>
         /// Comments or notes about the DNS record. This field has no effect on DNS responses.
@@ -41,7 +51,10 @@
         /// <remarks>Must be less than 32 characters.</remarks>
         [JsonPropertyName("id")]
         [MaxLength(32, ErrorMessage = "Id property must be less than 32 characters")]
-        public required string Id { get; init; }
+        public string Id { get; init; } =
+            id.Length <= 32
+                ? id
+                : throw new ValidationException("Id property must be less than 32 characters");
 
         /// <summary>
         /// Custom tags for the DNS record. This field has no effect on DNS responses.
