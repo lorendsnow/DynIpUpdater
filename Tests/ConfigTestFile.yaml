@@ -1,0 +1,22 @@
+Zones:
+- BearerToken: TestBearerToken
+  ApiKey: TestApiKey
+  Email: TestEmail
+  ZoneId: TestZoneId
+  DnsRecords:
+    - Address: null
+      Name: example.com
+      Proxied: true
+      RecordType: A
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
+    - Address: null
+      Name: www
+      Proxied: true
+      RecordType: A
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
