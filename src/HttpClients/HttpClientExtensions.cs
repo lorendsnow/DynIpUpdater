@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Headers;
-
-namespace DynIpUpdater
+﻿namespace DynIpUpdater
 {
     /// <summary>
     /// Extensions to add named HttpClients to the service collection.
@@ -30,20 +28,13 @@ namespace DynIpUpdater
         /// </summary>
         /// <param name="services">The hostbuilder's IServiceCollection</param>
         /// <returns>an updated services collection with the named HttpClient addded.</returns>
-        public static IServiceCollection AddCloudflareClient(
-            this IServiceCollection services,
-            string apiKey
-        )
+        public static IServiceCollection AddCloudflareClient(this IServiceCollection services)
         {
             services.AddHttpClient(
                 NamedHttpClients.CloudflareClient.ToString(),
                 client =>
                 {
                     client.BaseAddress = new Uri("https://api.cloudflare.com/client/v4");
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                        "Bearer",
-                        apiKey
-                    );
                 }
             );
 
