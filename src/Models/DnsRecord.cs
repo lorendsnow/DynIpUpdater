@@ -1,55 +1,110 @@
 ﻿namespace DynIpUpdater
 {
     /// <summary>
-    /// Represents an A or CNAME DNS record in Cloudflare.
+    /// Represents a DNS record to be created or updated in Cloudflare.
     /// </summary>
-    /// <param name="Address">A valid IPv4 address</param>
-    /// <param name="Name">
-    ///     The DNS record name in punycode. Must be less than 255 characters.
-    /// </param>
-    /// <param name="Proxied">
-    ///     Whether the record is receiving the performance and security benefits of Cloudflare.
-    /// </param>
-    /// <param name="RecordType">The type of DNS record. Must be one of "A" or "CNAME".</param>
-    /// <param name="Comment">
-    ///     Comments or notes about the DNS record. This field has no effect on DNS responses.
-    /// </param>
-    /// <param name="Id">Identification. Must be 32 characters or less.</param>
-    /// <param name="Tags">
-    ///     Custom tags for the DNS record. This field has no effect on DNS responses.
-    /// </param>
-    /// <param name="TTL">
-    ///     Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic' for
-    ///     Cloudflare purposes. If not set to 1, value must be between 60 and 86400, with the
-    ///     minimum reduced to 30 for Enterprise zones.
-    /// </param>
-    public record DnsRecord(
-        string Address,
-        string Name,
-        bool Proxied,
-        string RecordType,
-        string? Comment,
-        string Id,
-        string[]? Tags,
-        int TTL
-    )
+    public class DnsRecord
     {
-        public string Name { get; init; } =
-            Name.Length <= 255
-                ? Name
-                : throw new ValidationException("Name property must be less than 255 characters");
+        /// <summary>
+        /// A valid IPv4 address.
+        /// </summary>
+        public string? Address { get; set; }
 
-        public string RecordType { get; init; } =
-            RecordType == "A" || RecordType == "CNAME"
-                ? RecordType
-                : throw new ValidationException("RecordType must be one of 'A' or 'CNAME'");
+        private string _name = string.Empty;
 
-        public string Id { get; init; } =
-            Id.Length <= 32
-                ? Id
-                : throw new ValidationException("Id property must be less than 32 characters");
+        /// <summary>
+        /// The name of the DNS record.
+        /// </summary>
+        public required string Name
+        {
+            get => _name;
+            set => _name = ValidateName(value);
+        }
 
-        public int TTL { get; init; } = ValidateTTL(TTL);
+        /// <summary>
+        /// Whether the record is proxied through Cloudflare.
+        /// </summary>
+        public bool Proxied { get; set; }
+
+        private string _recordType = string.Empty;
+
+        /// <summary>
+        /// The type of DNS record. Must be one of 'A' or 'CNAME'.
+        /// </summary>
+        public required string RecordType
+        {
+            get => _recordType;
+            set => _recordType = ValidateRecordType(value);
+        }
+
+        /// <summary>
+        /// Comments or notes about the DNS record. This field has no effect on DNS responses.
+        /// </summary>
+        public string? Comment { get; set; }
+
+        private string? _id;
+
+        /// <summary>
+        /// The unique identifier for the DNS record.
+        /// </summary>
+        public string? Id
+        {
+            get => _id;
+            set => _id = ValidateId(value);
+        }
+
+        /// <summary>
+        /// Custom tags for the DNS record. This field has no effect on DNS responses.
+        /// </summary>
+        public string[] Tags { get; set; } = [];
+
+        private int _ttl = 1;
+
+        /// <summary>
+        /// The TTL (time to live) for the DNS record. Must be 1 for automatic, or between 60 and
+        /// 86400 for manual.
+        /// </summary>
+        public int TTL
+        {
+            get => _ttl;
+            set => _ttl = ValidateTTL(value);
+        }
+
+        private static string ValidateName(string value)
+        {
+            if (value.Length <= 255)
+            {
+                return value;
+            }
+            else
+            {
+                throw new ValidationException($"Property must be less than 255 characters");
+            }
+        }
+
+        private static string ValidateRecordType(string recordType)
+        {
+            if (recordType == "A" || recordType == "CNAME")
+            {
+                return recordType;
+            }
+            else
+            {
+                throw new ValidationException("RecordType must be one of 'A' or 'CNAME'");
+            }
+        }
+
+        private static string? ValidateId(string? id)
+        {
+            if (id is null || id.Length <= 32)
+            {
+                return id;
+            }
+            else
+            {
+                throw new ValidationException("Id property must be less than 32 characters");
+            }
+        }
 
         private static int ValidateTTL(int ttl)
         {
@@ -67,6 +122,25 @@
                     "TTL must be 1 for automatic, or between 60 and 86400 for manual"
                 );
             }
+        }
+
+        /// <summary>
+        /// Returns a string representation of the DNS record.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return $"DnsRecord "
+                + "{ "
+                + $"Address: {Address}, "
+                + $"Name: {Name}, "
+                + $"Proxied: {Proxied}, "
+                + $"RecordType: {RecordType}, "
+                + $"Comment: {Comment}, "
+                + $"Id: {Id}, "
+                + $"Tags: [{string.Join(", ", Tags)}] "
+                + $"TTL: {TTL} "
+                + "}";
         }
     }
 }
