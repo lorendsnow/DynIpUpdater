@@ -1,6 +1,3 @@
-using System.Text.RegularExpressions;
-using DynIpUpdater;
-
 namespace Tests
 {
     public partial class AddrFetcherTests

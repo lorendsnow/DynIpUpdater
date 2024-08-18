@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using DynIpUpdater;
-
-namespace Tests
+﻿namespace Tests
 {
     public class CloudflareClientTests
     {
