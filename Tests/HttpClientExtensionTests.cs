@@ -1,8 +1,4 @@
-﻿using DynIpUpdater;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
-namespace Tests
+﻿namespace Tests
 {
     public class HttpClientExtensionTests()
     {
@@ -26,7 +22,7 @@ namespace Tests
         {
             var builder = Host.CreateApplicationBuilder();
 
-            builder.Services.AddCloudflareClient("TEST_KEY");
+            builder.Services.AddCloudflareClient();
 
             var app = builder.Build();
             using HttpClient client = app
@@ -34,8 +30,6 @@ namespace Tests
                 .CreateClient(NamedHttpClients.CloudflareClient.ToString());
 
             Assert.True(client.BaseAddress == new Uri("https://api.cloudflare.com/client/v4"));
-            Assert.True(client.DefaultRequestHeaders.Authorization?.Scheme == "Bearer");
-            Assert.True(client.DefaultRequestHeaders.Authorization?.Parameter == "TEST_KEY");
         }
     }
 }
