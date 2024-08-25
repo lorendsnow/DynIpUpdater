@@ -45,5 +45,8 @@
                 + $"DnsRecords: [{string.Join(", ", DnsRecords)}] "
                 + "}";
         }
+
+        public bool HasARecords => DnsRecords.Any(record => record.RecordType == "A");
+        public bool HasCnameRecords => DnsRecords.Any(record => record.RecordType == "CNAME");
     }
 }
