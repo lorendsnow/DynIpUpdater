@@ -32,5 +32,18 @@
             ListCnameRecordsRequest request,
             CancellationToken cancellationToken
         );
+
+        /// <summary>
+        /// Create a new "A" or "CNAME" record in Cloudflare.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>
+        ///     The Cloudflare response with the created record or any errors/messages
+        /// </returns>
+        public Task<CreateDnsRecordResponse> CreateRecordAsync(
+            CreateDnsRecordRequest request,
+            CancellationToken cancellationToken
+        );
     }
 }
