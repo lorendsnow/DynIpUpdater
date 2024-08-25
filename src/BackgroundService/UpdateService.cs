@@ -7,10 +7,10 @@
         CloudflareConfiguration config
     ) : BackgroundService
     {
-        private readonly ILogger<UpdateService> _logger = logger;
-        private readonly IAddrFetcher _addrFetcher = addrFetcher;
-        private readonly ICloudflareClient _cloudflareClient = cloudflareClient;
-        private readonly CloudflareConfiguration _config = config;
+        public readonly ILogger<UpdateService> _logger = logger;
+        public readonly IAddrFetcher _addrFetcher = addrFetcher;
+        public readonly ICloudflareClient _cloudflareClient = cloudflareClient;
+        public readonly CloudflareConfiguration _config = config;
 
         public IAddress? CurrentAddress { get; set; }
 
