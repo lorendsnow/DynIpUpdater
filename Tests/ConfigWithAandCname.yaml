@@ -20,3 +20,19 @@ Zones:
       Id: null
       Tags: []
       TTL: 1
+    - Address: blog.example.com
+      Name: example.com
+      Proxied: true
+      RecordType: CNAME
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
+    - Address: mail.example.com
+      Name: example.com
+      Proxied: true
+      RecordType: CNAME
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
