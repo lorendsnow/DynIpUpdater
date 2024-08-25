@@ -73,6 +73,14 @@
         )
         {
             List<RecordResponse> existingRecords = await GetExistingRecords(zone, stoppingToken);
+
+            foreach (DnsRecord record in zone.DnsRecords)
+            {
+                if (!RecordExists(existingRecords, record))
+                {
+                    await CreateNewCloudflareRecord(record);
+                }
+            }
         }
 
         /// <summary>
@@ -145,6 +153,62 @@
             }
 
             return records;
+        }
+
+        /// <summary>
+        /// Check if a DNS record already exists in the list of records retrieved from Cloudflare.
+        /// </summary>
+        /// <param name="records">The list of Cloudflare records to check against.</param>
+        /// <param name="record">The subject DNS record</param>
+        /// <returns>true or false</returns>
+        public static bool RecordExists(List<RecordResponse> records, DnsRecord record)
+        {
+            return records.Any(existingRecord =>
+                existingRecord.Name == record.Name && existingRecord.Type == record.RecordType
+            );
+        }
+
+        public async Task CreateNewCloudflareRecord(DnsRecord record)
+        {
+            if (CurrentAddress is null)
+            {
+                throw new InvalidOperationException(
+                    "CurrentAddress is null; unable to add new records"
+                );
+            }
+
+            CreateDnsRecordRequest request =
+                new(
+                    CurrentAddress.Address,
+                    record.Name,
+                    record.Proxied,
+                    record.RecordType,
+                    record.Comment,
+                    record.Tags,
+                    record.TTL
+                );
+
+            CreateDnsRecordResponse response = await _cloudflareClient.CreateRecordAsync(
+                request,
+                CancellationToken.None
+            );
+
+            if (response.Success && response.Result is not null)
+            {
+                _logger.LogInformation(
+                    "Successfully created record {recordName} with id {recordId}",
+                    record.Name,
+                    response.Result.Id
+                );
+            }
+            else
+            {
+                _logger.LogError(
+                    "Failed to create record {recordName}: {errors}",
+                    record.Name,
+                    string.Join(", ", response.Errors)
+                );
+            }
         }
     }
 }
