@@ -28,6 +28,37 @@
         {
             return await Task.FromResult(_cnameRecordResponse);
         }
+
+        public async Task<CreateDnsRecordResponse> CreateRecordAsync(
+            CreateDnsRecordRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            RecordResponse result =
+                new()
+                {
+                    Content = request.RecordType == "A" ? "123.123.123.123" : request.Address,
+                    Name = request.Name,
+                    Proxied = request.Proxied,
+                    Type = request.RecordType,
+                    CreatedOn = DateTimeOffset.Now,
+                    Id = "023e105f4ecef8ad9ca31a8372d0c353",
+                    Meta = new RecordMeta() { AutoAdded = true, Source = "Source" },
+                    ModifiedOn = DateTimeOffset.Now,
+                    Proxiable = true,
+                    TTL = 1,
+                };
+
+            return await Task.FromResult(
+                new CreateDnsRecordResponse()
+                {
+                    Result = result,
+                    Errors = [],
+                    Messages = [],
+                    Success = true,
+                }
+            );
+        }
     }
 
     public class DummyClientFactory : IHttpClientFactory
