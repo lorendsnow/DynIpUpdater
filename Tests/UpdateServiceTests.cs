@@ -19,6 +19,40 @@
             Assert.Equal(4, records.Count);
         }
 
+        [Fact]
+        public async Task GetExistingRecords_NoExistingRecords_ReturnsEmpty()
+        {
+            UpdateService service = GenerateServiceInstance(
+                FakeRecordResponseGenerator.GenerateEmpty(),
+                FakeRecordResponseGenerator.GenerateEmpty(),
+                GenerateConfig("ConfigWithAandCname.yaml")
+            );
+
+            var records = await service.GetExistingRecords(
+                service._config.Zones[0],
+                CancellationToken.None
+            );
+
+            Assert.Empty(records);
+        }
+
+        [Fact]
+        public async Task GetExistingRecords_RequestThrowsError_ReturnsEmpty()
+        {
+            UpdateService service = GenerateServiceInstance(
+                FakeRecordResponseGenerator.GenerateEmptyWithError(),
+                FakeRecordResponseGenerator.GenerateEmpty(),
+                GenerateConfig("ConfigWithAandCname.yaml")
+            );
+
+            var records = await service.GetExistingRecords(
+                service._config.Zones[0],
+                CancellationToken.None
+            );
+
+            Assert.Empty(records);
+        }
+
         public static UpdateService GenerateServiceInstance(
             ListRecordsResponse aRecords,
             ListRecordsResponse cnameRecords,
@@ -32,7 +66,7 @@
             return new UpdateService(logger, addrFetcher, cfClient, config);
         }
 
-        public CloudflareConfiguration GenerateConfig(string fileName)
+        public static CloudflareConfiguration GenerateConfig(string fileName)
         {
             string path = PathGenerator.Generate(fileName);
             CloudflareConfiguration config;
