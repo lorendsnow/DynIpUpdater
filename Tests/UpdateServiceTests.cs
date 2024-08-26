@@ -7,8 +7,7 @@
         {
             UpdateService service = GenerateServiceInstance(
                 FakeRecordResponseGenerator.GenerateManyFakeARecords(),
-                FakeRecordResponseGenerator.GenerateManyFakeCnameRecords(),
-                GenerateConfig("ConfigWithAandCname.yaml")
+                GenerateConfig("ConfigWithMultipleA.yaml")
             );
 
             var records = await service.GetExistingRecords(
@@ -16,7 +15,7 @@
                 CancellationToken.None
             );
 
-            Assert.Equal(4, records.Count);
+            Assert.Equal(2, records.Count);
         }
 
         [Fact]
@@ -24,8 +23,7 @@
         {
             UpdateService service = GenerateServiceInstance(
                 FakeRecordResponseGenerator.GenerateEmpty(),
-                FakeRecordResponseGenerator.GenerateEmpty(),
-                GenerateConfig("ConfigWithAandCname.yaml")
+                GenerateConfig("ConfigWithMultipleA.yaml")
             );
 
             var records = await service.GetExistingRecords(
@@ -41,8 +39,7 @@
         {
             UpdateService service = GenerateServiceInstance(
                 FakeRecordResponseGenerator.GenerateEmptyWithError(),
-                FakeRecordResponseGenerator.GenerateEmpty(),
-                GenerateConfig("ConfigWithAandCname.yaml")
+                GenerateConfig("ConfigWithMultipleA.yaml")
             );
 
             var records = await service.GetExistingRecords(
@@ -55,11 +52,10 @@
 
         public static UpdateService GenerateServiceInstance(
             ListRecordsResponse aRecords,
-            ListRecordsResponse cnameRecords,
             CloudflareConfiguration config
         )
         {
-            MockCloudflareClient cfClient = new(aRecords, cnameRecords);
+            MockCloudflareClient cfClient = new(aRecords);
             MockAddrFetcher addrFetcher = new();
             FakeLogger<UpdateService> logger = new();
 

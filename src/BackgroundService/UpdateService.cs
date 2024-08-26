@@ -84,7 +84,7 @@
         }
 
         /// <summary>
-        /// Gets all existing "A" and "CNAME" records from Cloudflare.
+        /// Gets all existing "A" records from Cloudflare.
         /// </summary>
         /// <param name="zone">The zone to get records for.</param>
         /// <param name="stoppingToken">The token to monitor for cancellation requests.</param>
@@ -96,60 +96,29 @@
         {
             List<RecordResponse> records = [];
 
-            if (zone.HasARecords)
-            {
-                ListARecordsRequest req = new() { ZoneId = zone.ZoneId };
-                ListRecordsResponse aRecords = await _cloudflareClient.GetARecordsAsync(
-                    req,
-                    stoppingToken
-                );
+            ListARecordsRequest req = new() { ZoneId = zone.ZoneId };
+            ListRecordsResponse aRecords = await _cloudflareClient.GetARecordsAsync(
+                req,
+                stoppingToken
+            );
 
-                if (aRecords.Success && aRecords.Result is not null)
-                {
-                    records.AddRange(aRecords.Result);
-                }
-                else if (!aRecords.Success)
-                {
-                    _logger.LogError(
-                        "Failed to get A records: {errors}",
-                        string.Join(", ", aRecords.Errors)
-                    );
-                }
-                else
-                {
-                    _logger.LogInformation(
-                        "No existing A records found for zone {zoneId}",
-                        zone.ZoneId
-                    );
-                }
+            if (aRecords.Success && aRecords.Result is not null)
+            {
+                records.AddRange(aRecords.Result);
             }
-
-            if (zone.HasCnameRecords)
+            else if (!aRecords.Success)
             {
-                ListCnameRecordsRequest req = new() { ZoneId = zone.ZoneId };
-                ListRecordsResponse cnameRecords = await _cloudflareClient.GetCnameRecordsAsync(
-                    req,
-                    stoppingToken
+                _logger.LogError(
+                    "Failed to get A records: {errors}",
+                    string.Join(", ", aRecords.Errors)
                 );
-
-                if (cnameRecords.Success && cnameRecords.Result is not null)
-                {
-                    records.AddRange(cnameRecords.Result);
-                }
-                else if (!cnameRecords.Success)
-                {
-                    _logger.LogError(
-                        "Failed to get CNAME records: {errors}",
-                        string.Join(", ", cnameRecords.Errors)
-                    );
-                }
-                else
-                {
-                    _logger.LogInformation(
-                        "No existing CNAME records found for zone {zoneId}",
-                        zone.ZoneId
-                    );
-                }
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "No existing A records found for zone {zoneId}",
+                    zone.ZoneId
+                );
             }
 
             return records;
@@ -164,7 +133,7 @@
         public static bool RecordExists(List<RecordResponse> records, DnsRecord record)
         {
             return records.Any(existingRecord =>
-                existingRecord.Name == record.Name && existingRecord.Type == record.RecordType
+                existingRecord.Name == record.Name && existingRecord.Type == DnsRecord.RecordType
             );
         }
 
@@ -182,7 +151,6 @@
                     CurrentAddress.Address,
                     record.Name,
                     record.Proxied,
-                    record.RecordType,
                     record.Comment,
                     record.Tags,
                     record.TTL

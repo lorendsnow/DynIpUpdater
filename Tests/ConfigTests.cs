@@ -1,13 +1,11 @@
-﻿using Tests.Helpers;
-
-namespace Tests
+﻿namespace Tests
 {
     public partial class ConfigTests
     {
         [Fact]
         public void ParseConfigFile_WithValidConfigFile_ParsesConfig()
         {
-            string path = PathGenerator.Generate("ConfigWithAandCname.yaml");
+            string path = PathGenerator.Generate("ConfigWithMultipleA.yaml");
 
             var app = Host.CreateApplicationBuilder().ParseConfigFile(path).Build();
 
@@ -15,7 +13,7 @@ namespace Tests
 
             Assert.Single(config.Zones);
             Assert.Equal("TestBearerToken", config.Zones[0].BearerToken);
-            Assert.Equal(4, config.Zones[0].DnsRecords.Count);
+            Assert.Equal(2, config.Zones[0].DnsRecords.Count);
             Assert.Equal("example.com", config.Zones[0].DnsRecords[0].Name);
         }
     }

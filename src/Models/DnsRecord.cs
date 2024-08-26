@@ -1,7 +1,7 @@
 ﻿namespace DynIpUpdater
 {
     /// <summary>
-    /// Represents a DNS record to be created or updated in Cloudflare.
+    /// Represents an "A" DNS record to be created or updated in Cloudflare.
     /// </summary>
     public class DnsRecord
     {
@@ -26,15 +26,12 @@
         /// </summary>
         public bool Proxied { get; set; }
 
-        private string _recordType = string.Empty;
-
         /// <summary>
-        /// The type of DNS record. Must be one of 'A' or 'CNAME'.
+        /// The type of DNS record.
         /// </summary>
-        public required string RecordType
+        public static string RecordType
         {
-            get => _recordType;
-            set => _recordType = ValidateRecordType(value);
+            get => "A";
         }
 
         /// <summary>
@@ -79,18 +76,6 @@
             else
             {
                 throw new ValidationException($"Property must be less than 255 characters");
-            }
-        }
-
-        private static string ValidateRecordType(string recordType)
-        {
-            if (recordType == "A" || recordType == "CNAME")
-            {
-                return recordType;
-            }
-            else
-            {
-                throw new ValidationException("RecordType must be one of 'A' or 'CNAME'");
             }
         }
 

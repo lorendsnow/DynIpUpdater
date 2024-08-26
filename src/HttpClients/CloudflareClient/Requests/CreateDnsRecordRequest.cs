@@ -1,13 +1,12 @@
 ﻿namespace DynIpUpdater
 {
     /// <summary>
-    /// Represents a request body for creating an A or CNAME record in Cloudflare.
+    /// Represents a request body for creating an A record in Cloudflare.
     /// </summary>
     public record CreateDnsRecordRequest(
         string Address,
         string Name,
         bool Proxied,
-        string RecordType,
         string? Comment,
         string[] Tags,
         int TTL
@@ -38,12 +37,11 @@
         /// <summary>
         /// The type of DNS record.
         /// </summary>
-        /// <remarks>Must be one of "A" or "CNAME"</remarks>
         [JsonPropertyName("type")]
-        public string RecordType { get; init; } =
-            RecordType == "A" || RecordType == "CNAME"
-                ? RecordType
-                : throw new ValidationException("RecordType must be one of 'A' or 'CNAME'");
+        public static string RecordType
+        {
+            get => "A";
+        }
 
         /// <summary>
         /// Comments or notes about the DNS record. This field has no effect on DNS responses.

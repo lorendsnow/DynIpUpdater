@@ -1,12 +1,8 @@
 ﻿namespace Tests.Helpers
 {
-    public class MockCloudflareClient(
-        ListRecordsResponse aRecordResponse,
-        ListRecordsResponse cnameRecordResponse
-    ) : ICloudflareClient
+    public class MockCloudflareClient(ListRecordsResponse aRecordResponse) : ICloudflareClient
     {
         private readonly ListRecordsResponse _aRecordResponse = aRecordResponse;
-        private readonly ListRecordsResponse _cnameRecordResponse = cnameRecordResponse;
 
         public IHttpClientFactory Factory
         {
@@ -21,14 +17,6 @@
             return await Task.FromResult(_aRecordResponse);
         }
 
-        public async Task<ListRecordsResponse> GetCnameRecordsAsync(
-            ListCnameRecordsRequest request,
-            CancellationToken cancellationToken
-        )
-        {
-            return await Task.FromResult(_cnameRecordResponse);
-        }
-
         public async Task<CreateDnsRecordResponse> CreateRecordAsync(
             CreateDnsRecordRequest request,
             CancellationToken cancellationToken
@@ -37,10 +25,10 @@
             RecordResponse result =
                 new()
                 {
-                    Content = request.RecordType == "A" ? "123.123.123.123" : request.Address,
+                    Content = "123.123.123.123",
                     Name = request.Name,
                     Proxied = request.Proxied,
-                    Type = request.RecordType,
+                    Type = "A",
                     CreatedOn = DateTimeOffset.Now,
                     Id = "023e105f4ecef8ad9ca31a8372d0c353",
                     Meta = new RecordMeta() { AutoAdded = true, Source = "Source" },
@@ -96,52 +84,6 @@
                         Name = "www",
                         Proxied = true,
                         Type = "A",
-                        CreatedOn = DateTimeOffset.Now,
-                        Id = "023e105f4ecef8ad9ca31a8372d0c353",
-                        Meta = new RecordMeta() { AutoAdded = true, Source = "Source" },
-                        ModifiedOn = DateTimeOffset.Now,
-                        Proxiable = true,
-                        TTL = 1,
-                    },
-                ],
-                Errors = [],
-                Messages = [],
-                Success = true,
-                ResultInfo = new ResultInfo()
-                {
-                    Count = 2,
-                    Page = 1,
-                    PerPage = 20,
-                    TotalCount = 2
-                },
-            };
-        }
-
-        public static ListRecordsResponse GenerateManyFakeCnameRecords()
-        {
-            return new ListRecordsResponse()
-            {
-                Result =
-                [
-                    new RecordResponse()
-                    {
-                        Content = "blog.example.com",
-                        Name = "example.com",
-                        Proxied = true,
-                        Type = "CNAME",
-                        CreatedOn = DateTimeOffset.Now,
-                        Id = "023e105f4ecef8ad9ca31a8372d0c353",
-                        Meta = new RecordMeta() { AutoAdded = true, Source = "Source" },
-                        ModifiedOn = DateTimeOffset.Now,
-                        Proxiable = true,
-                        TTL = 1,
-                    },
-                    new RecordResponse()
-                    {
-                        Content = "mail.example.com",
-                        Name = "example.com",
-                        Proxied = true,
-                        Type = "CNAME",
                         CreatedOn = DateTimeOffset.Now,
                         Id = "023e105f4ecef8ad9ca31a8372d0c353",
                         Meta = new RecordMeta() { AutoAdded = true, Source = "Source" },

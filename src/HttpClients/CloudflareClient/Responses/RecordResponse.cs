@@ -1,13 +1,12 @@
 ﻿namespace DynIpUpdater
 {
     /// <summary>
-    /// Represents an "A" or "CNAME" record response from the Cloudflare API.
+    /// Represents an "A" record response from the Cloudflare API.
     /// </summary>
     public record RecordResponse
     {
         /// <summary>
-        /// A valid IPv4 address (in the case of an A record) or a hostname (in the case of a
-        /// CNAME record).
+        /// A valid IPv4 address.
         /// </summary>
         public required string Content { get; init; }
 

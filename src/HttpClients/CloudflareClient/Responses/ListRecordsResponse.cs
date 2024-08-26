@@ -1,7 +1,7 @@
 ﻿namespace DynIpUpdater
 {
     /// <summary>
-    /// Represents the Cloudflare response to a request to list "A" or "CNAME" records.
+    /// Represents the Cloudflare response to a request to list "A" records.
     /// </summary>
     public record ListRecordsResponse
     {
