@@ -12,6 +12,11 @@
         public required List<ZoneConfiguration> Zones { get; set; }
 
         /// <summary>
+        /// Interval in minutes to wait between IP checks.
+        /// </summary>
+        public int Interval { get; init; }
+
+        /// <summary>
         /// Returns a string representation of the configuration.
         /// </summary>
         /// <returns></returns>
