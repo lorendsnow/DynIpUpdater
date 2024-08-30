@@ -19,6 +19,13 @@
             get => CurrentAddress is not null;
         }
 
+        public TimeSpan Interval
+        {
+            get => TimeSpan.FromMinutes(_config.Interval);
+        }
+
+        public Dictionary<string, List<DnsRecord>> Records { get; set; } = [];
+
         /// <summary>
         /// Performs initiation tasks and then enters a loop to check and update DNS records.
         /// </summary>
@@ -26,11 +33,14 @@
         /// <returns></returns>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            CurrentAddress = await _addrFetcher.FetchAddressAsync();
+
             /* On initialization, we build an inventory of records that will need to be updated.
              * If the records don't already exist in Cloudflare, we create them.
             */
             foreach (ZoneConfiguration zone in _config.Zones)
             {
+                Records.Add(zone.ZoneId, []);
                 await InitiateRecordsAsync(zone, stoppingToken);
             }
 
@@ -38,23 +48,27 @@
             {
                 if (!AddressSet)
                 {
-                    CurrentAddress = await _addrFetcher.FetchAddressAsync();
-                    if (_logger.IsEnabled(LogLevel.Information))
-                    {
-                        _logger.LogInformation("Ip Address is {address}", CurrentAddress.Address);
-                    }
+                    // Something is wrong - should have been set before entering this loop.
+                    InvalidOperationException ex =
+                        new("IP Address was not set before entering loop");
+                    _logger.LogError(ex, "{message}", ex.Message);
+                    throw ex;
                 }
                 else
                 {
-                    if (_logger.IsEnabled(LogLevel.Information))
+                    IAddress address = await _addrFetcher.FetchAddressAsync();
+                    if (address.Address != CurrentAddress.Address)
                     {
                         _logger.LogInformation(
-                            "Ip Address is already set to {address}",
-                            CurrentAddress?.Address
+                            "IP address has changed from {oldAddress} to {newAddress}, updating records",
+                            CurrentAddress.Address,
+                            address.Address
                         );
+                        await UpdateRecordsAsync();
+                        _logger.LogInformation("Records updated successfully");
                     }
                 }
-                await Task.Delay(1000, stoppingToken);
+                await Task.Delay(Interval, stoppingToken);
             }
         }
 
@@ -78,7 +92,25 @@
             {
                 if (!RecordExists(existingRecords, record))
                 {
-                    await CreateNewCloudflareRecord(record);
+                    _logger.LogDebug(
+                        "Record {recordName} not found in existing Cloudflare records, attempting "
+                            + "to create new record",
+                        record.Name
+                    );
+
+                    TryCreateNewCloudflareRecord(record, out DnsRecord? result);
+                    if (result is not null)
+                    {
+                        Records[zone.ZoneId].Add(result);
+                    }
+                }
+                else
+                {
+                    _logger.LogDebug(
+                        "Record {recordName} already exists in Cloudflare",
+                        record.Name
+                    );
+                    Records[zone.ZoneId].Add(record);
                 }
             }
         }
@@ -137,13 +169,21 @@
             );
         }
 
-        public async Task CreateNewCloudflareRecord(DnsRecord record)
+        /// <summary>
+        /// Trys to create a new A record in Cloudflare.
+        /// </summary>
+        /// <param name="record">The record to create.</param>
+        /// <param name="result">The resulting record if successful.</param>
+        /// <returns>true if successful, otherwise false</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public bool TryCreateNewCloudflareRecord(DnsRecord record, out DnsRecord? result)
         {
             if (CurrentAddress is null)
             {
-                throw new InvalidOperationException(
-                    "CurrentAddress is null; unable to add new records"
-                );
+                InvalidOperationException ex =
+                    new("CurrentAddress is null; unable to add new records");
+                _logger.LogError(ex, "{message}", ex.Message);
+                throw ex;
             }
 
             CreateDnsRecordRequest request =
@@ -156,10 +196,9 @@
                     record.TTL
                 );
 
-            CreateDnsRecordResponse response = await _cloudflareClient.CreateRecordAsync(
-                request,
-                CancellationToken.None
-            );
+            CreateDnsRecordResponse response = _cloudflareClient
+                .CreateRecordAsync(request, CancellationToken.None)
+                .Result;
 
             if (response.Success && response.Result is not null)
             {
@@ -168,6 +207,19 @@
                     record.Name,
                     response.Result.Id
                 );
+
+                result = new DnsRecord()
+                {
+                    Address = response.Result.Content,
+                    Name = response.Result.Name,
+                    Proxied = response.Result.Proxied,
+                    Comment = response.Result.Comment,
+                    Id = response.Result.Id,
+                    Tags = response.Result.Tags ?? [],
+                    TTL = response.Result.TTL
+                };
+
+                return true;
             }
             else
             {
@@ -176,7 +228,16 @@
                     record.Name,
                     string.Join(", ", response.Errors)
                 );
+
+                result = null;
+                return false;
             }
+        }
+
+        public async Task UpdateRecordsAsync()
+        {
+            await Task.Delay(1);
+            throw new NotImplementedException();
         }
     }
 }
