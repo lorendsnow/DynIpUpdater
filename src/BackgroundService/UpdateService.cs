@@ -64,7 +64,11 @@
                             CurrentAddress.Address,
                             address.Address
                         );
-                        await UpdateRecordsAsync();
+                        CurrentAddress = address;
+                        foreach (string zone in Records.Keys)
+                        {
+                            await UpdateRecordsAsync(zone, address.Address);
+                        }
                         _logger.LogInformation("Records updated successfully");
                     }
                 }
@@ -196,7 +200,7 @@
                     record.TTL
                 );
 
-            CreateDnsRecordResponse response = _cloudflareClient
+            SingleRecordResponse response = _cloudflareClient
                 .CreateRecordAsync(request, CancellationToken.None)
                 .Result;
 
@@ -234,10 +238,84 @@
             }
         }
 
-        public async Task UpdateRecordsAsync()
+        /// <summary>
+        /// Updates all records in a given zone with a new address.
+        /// </summary>
+        /// <param name="zone">The zone being updated</param>
+        /// <param name="newAddress">The IP address to update to</param>
+        /// <returns></returns>
+        public async Task UpdateRecordsAsync(string zone, string newAddress)
         {
-            await Task.Delay(1);
-            throw new NotImplementedException();
+            foreach (DnsRecord record in Records[zone])
+            {
+                if (record.Id is null)
+                {
+                    _logger.LogError(
+                        "Record {recordName} does not have an ID, skipping update",
+                        record.Name
+                    );
+                    continue;
+                }
+
+                UpdateDnsRecordRequest request =
+                    new(
+                        newAddress,
+                        record.Name,
+                        record.Proxied,
+                        record.Comment,
+                        record.Id,
+                        record.Tags,
+                        record.TTL
+                    );
+
+                SingleRecordResponse response = await _cloudflareClient.UpdateRecordAsync(
+                    request,
+                    CancellationToken.None
+                );
+
+                HandleUpdateResult(response, record, newAddress);
+            }
+        }
+
+        /// <summary>
+        /// Handles the result of an update operation, by parsing the updated record or logging
+        /// errors, and also logging any messages returned.
+        /// </summary>
+        /// <param name="response">The response being handled.</param>
+        /// <param name="record">The record trying to be updated.</param>
+        /// <param name="newAddress">The IP address we wanted to update the record with.</param>
+        public void HandleUpdateResult(
+            SingleRecordResponse response,
+            DnsRecord record,
+            string newAddress
+        )
+        {
+            if (response.Success)
+            {
+                _logger.LogInformation(
+                    "Successfully updated record {recordName} with id {recordId}",
+                    record.Name,
+                    record.Id
+                );
+                record.Address = newAddress;
+            }
+            else
+            {
+                _logger.LogError(
+                    "Failed to update record {recordName}: {errors}",
+                    record.Name,
+                    string.Join(", ", response.Errors)
+                );
+            }
+
+            if (response.Messages.Length > 0)
+            {
+                _logger.LogInformation(
+                    "Messages for record {recordName}: {messages}",
+                    record.Name,
+                    string.Join(", ", response.Messages)
+                );
+            }
         }
     }
 }
