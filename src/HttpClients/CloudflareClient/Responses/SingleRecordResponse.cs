@@ -1,6 +1,10 @@
 ﻿namespace DynIpUpdater
 {
-    public record CreateDnsRecordResponse
+    /// <summary>
+    /// Represents a response from Cloudflare related to a single record (e.g., updating or
+    /// creating a record).
+    /// </summary>
+    public record SingleRecordResponse
     {
         /// <summary>
         /// The result of the record creation request.
