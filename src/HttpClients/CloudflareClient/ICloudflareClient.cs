@@ -30,8 +30,21 @@
         /// <returns>
         ///     The Cloudflare response with the created record or any errors/messages
         /// </returns>
-        public Task<CreateDnsRecordResponse> CreateRecordAsync(
+        public Task<SingleRecordResponse> CreateRecordAsync(
             CreateDnsRecordRequest request,
+            CancellationToken cancellationToken
+        );
+
+        /// <summary>
+        /// Update an existing "A" record in Cloudflare.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>
+        ///     The Cloudflare response with the updated record or any errors/messages
+        /// </returns>
+        public Task<SingleRecordResponse> UpdateRecordAsync(
+            UpdateDnsRecordRequest request,
             CancellationToken cancellationToken
         );
     }
