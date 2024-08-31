@@ -27,25 +27,13 @@
         /// A list of messages returned by the request.
         /// </summary>
         [JsonPropertyName("messages")]
-        public required ResponseError[] Messages { get; init; }
+        public required ResponseMessage[] Messages { get; init; }
 
         /// <summary>
         /// Additional information about the result.
         /// </summary>
         [JsonPropertyName("result_info")]
         public ResultInfo ResultInfo { get; init; }
-    }
-
-    /// <summary>
-    /// Represents an error and/or message returned by the Cloudflare API.
-    /// </summary>
-    public readonly struct ResponseError
-    {
-        [JsonPropertyName("code")]
-        public int Code { get; init; }
-
-        [JsonPropertyName("message")]
-        public string Message { get; init; }
     }
 
     /// <summary>
