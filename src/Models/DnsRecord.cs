@@ -93,10 +93,14 @@
 
         private static int ValidateTTL(int ttl)
         {
-            if (ttl == 1)
+            // if no ttl was provided (i.e., we have default int value of 0), default to 1
+            if (ttl == 0 || ttl == 1)
             {
                 return 1;
             }
+            /* We're assuming enterprise users aren't using this tool, so values from 30 to 59
+             * are not valid.
+             */
             else if (ttl >= 60 && ttl <= 86400)
             {
                 return ttl;
