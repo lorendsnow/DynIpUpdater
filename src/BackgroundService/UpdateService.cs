@@ -60,14 +60,15 @@
                     if (address.Address != CurrentAddress.Address)
                     {
                         _logger.LogInformation(
-                            "IP address has changed from {oldAddress} to {newAddress}, updating records",
+                            "IP address has changed from {oldAddress} to {newAddress}, "
+                                + "updating records",
                             CurrentAddress.Address,
                             address.Address
                         );
                         CurrentAddress = address;
-                        foreach (string zone in Records.Keys)
+                        foreach (string zoneId in Records.Keys)
                         {
-                            await UpdateRecordsAsync(zone, address.Address);
+                            await UpdateRecordsAsync(zoneId, address.Address, stoppingToken);
                         }
                         _logger.LogInformation("Records updated successfully");
                     }
@@ -102,7 +103,12 @@
                         record.Name
                     );
 
-                    TryCreateNewCloudflareRecord(record, out DnsRecord? result);
+                    TryCreateNewCloudflareRecord(
+                        record,
+                        zone.ZoneId,
+                        stoppingToken,
+                        out DnsRecord? result
+                    );
                     if (result is not null)
                     {
                         Records[zone.ZoneId].Add(result);
@@ -177,10 +183,17 @@
         /// Trys to create a new A record in Cloudflare.
         /// </summary>
         /// <param name="record">The record to create.</param>
+        /// <param name="zoneId">The zone to create the record in.</param>
+        /// <param name="stoppingToken">The token to monitor for cancellation requests.</param>
         /// <param name="result">The resulting record if successful.</param>
         /// <returns>true if successful, otherwise false</returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public bool TryCreateNewCloudflareRecord(DnsRecord record, out DnsRecord? result)
+        public bool TryCreateNewCloudflareRecord(
+            DnsRecord record,
+            string zoneId,
+            CancellationToken stoppingToken,
+            out DnsRecord? result
+        )
         {
             if (CurrentAddress is null)
             {
@@ -201,7 +214,7 @@
                 );
 
             SingleRecordResponse response = _cloudflareClient
-                .CreateRecordAsync(request, CancellationToken.None)
+                .CreateRecordAsync(request, zoneId, stoppingToken)
                 .Result;
 
             if (response.Success && response.Result is not null)
@@ -241,12 +254,17 @@
         /// <summary>
         /// Updates all records in a given zone with a new address.
         /// </summary>
-        /// <param name="zone">The zone being updated</param>
+        /// <param name="zoneId">Id of the zone being updated</param>
         /// <param name="newAddress">The IP address to update to</param>
+        /// <param name="stoppingToken">The token to monitor for cancellation requests.</param>
         /// <returns></returns>
-        public async Task UpdateRecordsAsync(string zone, string newAddress)
+        public async Task UpdateRecordsAsync(
+            string zoneId,
+            string newAddress,
+            CancellationToken stoppingToken
+        )
         {
-            foreach (DnsRecord record in Records[zone])
+            foreach (DnsRecord record in Records[zoneId])
             {
                 if (record.Id is null)
                 {
@@ -270,7 +288,8 @@
 
                 SingleRecordResponse response = await _cloudflareClient.UpdateRecordAsync(
                     request,
-                    CancellationToken.None
+                    zoneId,
+                    stoppingToken
                 );
 
                 HandleUpdateResult(response, record, newAddress);

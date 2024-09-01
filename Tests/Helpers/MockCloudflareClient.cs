@@ -19,13 +19,14 @@
 
         public async Task<SingleRecordResponse> CreateRecordAsync(
             CreateDnsRecordRequest request,
+            string zoneId,
             CancellationToken cancellationToken
         )
         {
             RecordResponse result =
                 new()
                 {
-                    ZoneId = "023e105f4ecef8ad9ca31a8372d0c353",
+                    ZoneId = zoneId,
                     ZoneName = "example.com",
                     Content = "123.123.123.123",
                     Name = request.Name,
@@ -52,13 +53,14 @@
 
         public async Task<SingleRecordResponse> UpdateRecordAsync(
             UpdateDnsRecordRequest request,
+            string zoneId,
             CancellationToken cancellationToken
         )
         {
             RecordResponse result =
                 new()
                 {
-                    ZoneId = "023e105f4ecef8ad9ca31a8372d0c353",
+                    ZoneId = zoneId,
                     ZoneName = "example.com",
                     Content = "123.123.123.123",
                     Name = request.Name,
