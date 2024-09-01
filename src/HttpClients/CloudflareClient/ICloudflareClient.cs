@@ -25,26 +25,30 @@
         /// <summary>
         /// Create a new "A" record in Cloudflare.
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="request">The request object</param>
+        /// <param name="zoneId">The zone ID</param>
+        /// <param name="cancellationToken">A cancellation token</param>
         /// <returns>
         ///     The Cloudflare response with the created record or any errors/messages
         /// </returns>
         public Task<SingleRecordResponse> CreateRecordAsync(
             CreateDnsRecordRequest request,
+            string zoneId,
             CancellationToken cancellationToken
         );
 
         /// <summary>
         /// Update an existing "A" record in Cloudflare.
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellationToken"></param>
+        /// <param name="request">The request object</param>
+        /// <param name="zoneId">The record's zone ID</param>
+        /// <param name="cancellationToken">A cancellation token</param>
         /// <returns>
         ///     The Cloudflare response with the updated record or any errors/messages
         /// </returns>
         public Task<SingleRecordResponse> UpdateRecordAsync(
             UpdateDnsRecordRequest request,
+            string zoneId,
             CancellationToken cancellationToken
         );
     }
