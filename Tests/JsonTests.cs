@@ -1,8 +1,3 @@
-using System;
-using System.Text.Json;
-using DynIpUpdater;
-using Xunit;
-
 namespace Tests;
 
 public class JsonTests
