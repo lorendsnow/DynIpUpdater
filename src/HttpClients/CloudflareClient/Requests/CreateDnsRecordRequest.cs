@@ -38,10 +38,7 @@
         /// The type of DNS record.
         /// </summary>
         [JsonPropertyName("type")]
-        public static string RecordType
-        {
-            get => "A";
-        }
+        public string RecordType => "A";
 
         /// <summary>
         /// Comments or notes about the DNS record. This field has no effect on DNS responses.
@@ -69,19 +66,15 @@
         /// Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
         /// </summary>
         /// <remarks>
-        /// Value must be between 60 and 86400, with the minimum reduced to 30 for Enterprise
-        /// zones.
+        /// Value must be between 60 and 86400. Enterprise zones can have a minimum TTL of 30, but
+        /// this validation method assumes that enterprise users are not using this program.
         /// </remarks>
         [JsonPropertyName("ttl")]
         public int TTL { get; init; } = ValidateTTL(TTL);
 
         private static int ValidateTTL(int ttl)
         {
-            if (ttl == 1)
-            {
-                return 1;
-            }
-            else if (ttl >= 60 && ttl <= 86400)
+            if (ttl == 1 || (ttl >= 60 && ttl <= 86400))
             {
                 return ttl;
             }
