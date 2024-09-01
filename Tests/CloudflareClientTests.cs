@@ -83,5 +83,13 @@
             CreateDnsRecordRequest request =
                 new("123.123.123.123", "example.com", true, null, [], ttl);
         }
+
+        [Fact]
+        public void ListARecordsRequest_InitiateInstance_SetsRecordTypeToA()
+        {
+            ListARecordsRequest request = new() { ZoneId = "12345" };
+            Assert.Equal("A", request.RecordType);
+            Assert.Equal("12345", request.ZoneId);
+        }
     }
 }
