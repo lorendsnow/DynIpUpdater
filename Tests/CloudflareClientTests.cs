@@ -42,6 +42,16 @@
             });
         }
 
+        [Theory]
+        [InlineData(1)]
+        [InlineData(60)]
+        [InlineData(86400)]
+        public void UpdateDnsRecordRequest_TTLValid_DoesNotThrowValidationException(int ttl)
+        {
+            UpdateDnsRecordRequest request =
+                new("123.123.123.123", "example.com", true, null, "12345", [], ttl);
+        }
+
         [Fact]
         public void CreateDnsRecordRequest_NameTooLong_ThrowsValidationException()
         {
@@ -62,6 +72,16 @@
                 CreateDnsRecordRequest request =
                     new("123.123.123.123", "example.com", true, null, [], ttl);
             });
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(60)]
+        [InlineData(86400)]
+        public void CreateDnsRecordRequest_TTLValid_DoesNotThrowValidationException(int ttl)
+        {
+            CreateDnsRecordRequest request =
+                new("123.123.123.123", "example.com", true, null, [], ttl);
         }
     }
 }
