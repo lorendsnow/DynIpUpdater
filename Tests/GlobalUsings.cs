@@ -5,5 +5,6 @@ global using DynIpUpdater;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging.Testing;
+global using RichardSzalay.MockHttp;
 global using Tests.Helpers;
 global using YamlDotNet.Serialization;
