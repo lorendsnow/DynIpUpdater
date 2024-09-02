@@ -31,12 +31,15 @@ jobs:
           path: .\.sonar\scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
-      - name: Install SonarQube scanner and dotnet-coverage
+      - name: Install SonarQube scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: powershell
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+      - name: Install dotnet-coverage
+        shell: powershell
+        run: |
           dotnet tool install --global dotnet-coverage
       - name: Build and analyze
         env:
