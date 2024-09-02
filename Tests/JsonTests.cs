@@ -2,6 +2,8 @@ namespace Tests;
 
 public class JsonTests
 {
+    private static readonly string[] _tags = ["test", "example"];
+
     [Fact]
     public void DeserializeResponseMessage_ShouldCreateValidStruct()
     {
@@ -36,7 +38,7 @@ public class JsonTests
             Name: "example.com",
             Proxied: true,
             Comment: "Test record",
-            Tags: new[] { "test", "example" },
+            Tags: _tags,
             TTL: 3600
         );
 
@@ -79,16 +81,11 @@ public class JsonTests
             Proxied: true,
             Comment: "Updated test record",
             Id: "023e105f4ecef8ad9ca31a8372d0c353",
-            Tags: new[] { "updated", "test" },
+            Tags: _tags,
             TTL: 1800
         );
 
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-        string json = JsonSerializer.Serialize(request, options);
+        string json = JsonSerializer.Serialize(request);
 
         var expectedJson =
             @"{
@@ -99,8 +96,8 @@ public class JsonTests
             ""comment"": ""Updated test record"",
             ""id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
             ""tags"": [
-                ""updated"",
-                ""test""
+                ""test"",
+                ""example""
             ],
             ""ttl"": 1800
         }";
@@ -113,5 +110,204 @@ public class JsonTests
             .Replace(" ", "");
 
         Assert.Equal(normalizedExpectedJson, normalizedJson);
+    }
+
+    [Fact]
+    public void DeserializeRecordResponse_NoComments_ShouldCreateValidRecord()
+    {
+        string json =
+            @"{
+                ""id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                ""zone_id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                ""zone_name"": ""example.com"",
+                ""name"": ""example.com"",
+                ""type"": ""A"",
+                ""content"": ""192.0.2.1"",
+                ""proxiable"": true,
+                ""proxied"": true,
+                ""ttl"": 120,
+                ""meta"": {
+                    ""auto_added"": false,
+                    ""managed_by_apps"": false,
+                    ""managed_by_argo_tunnel"": false
+                },
+                ""tags"": [],
+                ""created_on"": ""2024-02-14T00:00:00Z"",
+                ""modified_on"": ""2024-02-14T00:00:00Z""
+            }";
+
+        RecordResponse? response = JsonSerializer.Deserialize<RecordResponse>(json);
+
+        Assert.NotNull(response);
+        Assert.Equal("023e105f4ecef8ad9ca31a8372d0c353", response?.Id);
+    }
+
+    [Fact]
+    public void DeserializeRecordResponse_WithAllFields_ShouldCreateValidRecord()
+    {
+        string json =
+            @"{
+                ""id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                ""zone_id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                ""zone_name"": ""example.com"",
+                ""name"": ""example.com"",
+                ""type"": ""A"",
+                ""content"": ""192.0.2.1"",
+                ""proxiable"": true,
+                ""proxied"": true,
+                ""ttl"": 120,
+                ""meta"": {
+                    ""auto_added"": false,
+                    ""managed_by_apps"": false,
+                    ""managed_by_argo_tunnel"": false
+                },
+                ""comment"": ""This is a test comment"",
+                ""comment_modified_on"": ""2024-02-14T00:00:00Z"",
+                ""tags"": [""test"", ""example""],
+                ""tags_modified_on"": ""2024-02-14T00:00:00Z"",
+                ""created_on"": ""2024-02-14T00:00:00Z"",
+                ""modified_on"": ""2024-02-14T00:00:00Z""
+            }";
+
+        RecordResponse? response = JsonSerializer.Deserialize<RecordResponse>(json);
+
+        Assert.NotNull(response);
+        Assert.Equal("023e105f4ecef8ad9ca31a8372d0c353", response?.Id);
+        Assert.Equal("This is a test comment", response?.Comment);
+        Assert.Equal(_tags, response?.Tags);
+        Assert.Equal(new DateTime(2024, 2, 14, 0, 0, 0), response?.CreatedOn.DateTime);
+        Assert.Equal(new DateTime(2024, 2, 14, 0, 0, 0), response?.ModifiedOn.DateTime);
+    }
+
+    [Fact]
+    public void DeserializeSingleRecordResponse_ShouldCreateValidRecord()
+    {
+        string json =
+            @"{
+                ""result"": {
+                    ""id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                    ""zone_id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                    ""zone_name"": ""example.com"",
+                    ""name"": ""example.com"",
+                    ""type"": ""A"",
+                    ""content"": ""192.0.2.1"",
+                    ""proxiable"": true,
+                    ""proxied"": true,
+                    ""ttl"": 120,
+                    ""meta"": {
+                        ""auto_added"": false,
+                        ""managed_by_apps"": false,
+                        ""managed_by_argo_tunnel"": false
+                    },
+                    ""comment"": ""This is a test comment"",
+                    ""comment_modified_on"": ""2024-02-14T00:00:00Z"",
+                    ""tags"": [""test"", ""example""],
+                    ""tags_modified_on"": ""2024-02-14T00:00:00Z"",
+                    ""created_on"": ""2024-02-14T00:00:00Z"",
+                    ""modified_on"": ""2024-02-14T00:00:00Z""
+                },
+                ""success"": true,
+                ""errors"": [],
+                ""messages"": []
+            }";
+
+        SingleRecordResponse? response = JsonSerializer.Deserialize<SingleRecordResponse>(json);
+
+        Assert.NotNull(response);
+        Assert.Equal("023e105f4ecef8ad9ca31a8372d0c353", response?.Result?.Id);
+        Assert.Equal("This is a test comment", response?.Result?.Comment);
+        Assert.Equal(_tags, response?.Result?.Tags);
+        Assert.Equal(new DateTime(2024, 2, 14, 0, 0, 0), response?.Result?.CreatedOn.DateTime);
+        Assert.Equal(new DateTime(2024, 2, 14, 0, 0, 0), response?.Result?.ModifiedOn.DateTime);
+    }
+
+    [Fact]
+    public void DeserializeSingleRecordResponse_NullResult_ShouldCreateValidRecord()
+    {
+        string json =
+            @"{
+                ""result"": null,
+                ""success"": true,
+                ""errors"": [],
+                ""messages"": []
+            }";
+
+        SingleRecordResponse? response = JsonSerializer.Deserialize<SingleRecordResponse>(json);
+
+        Assert.NotNull(response);
+        Assert.Null(response?.Result);
+    }
+
+    [Fact]
+    public void DeserializeListRecordsResponse_ShouldCreateValidRecord()
+    {
+        string json =
+            @"{
+                ""result"": [
+                    {
+                        ""id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                        ""zone_id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                        ""zone_name"": ""example.com"",
+                        ""name"": ""example.com"",
+                        ""type"": ""A"",
+                        ""content"": ""192.0.2.1"",
+                        ""proxiable"": true,
+                        ""proxied"": true,
+                        ""ttl"": 120,
+                        ""meta"": {
+                            ""auto_added"": false,
+                            ""managed_by_apps"": false,
+                            ""managed_by_argo_tunnel"": false
+                        },
+                        ""comment"": ""This is a test comment"",
+                        ""comment_modified_on"": ""2024-02-14T00:00:00Z"",
+                        ""tags"": [""test"", ""example""],
+                        ""tags_modified_on"": ""2024-02-14T00:00:00Z"",
+                        ""created_on"": ""2024-02-14T00:00:00Z"",
+                        ""modified_on"": ""2024-02-14T00:00:00Z""
+                    }, 
+                    {
+                        ""id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                        ""zone_id"": ""023e105f4ecef8ad9ca31a8372d0c353"",
+                        ""zone_name"": ""example.com"",
+                        ""name"": ""test"",
+                        ""type"": ""A"",
+                        ""content"": ""192.0.2.1"",
+                        ""proxiable"": true,
+                        ""proxied"": true,
+                        ""ttl"": 120,
+                        ""meta"": {
+                            ""auto_added"": false,
+                            ""managed_by_apps"": false,
+                            ""managed_by_argo_tunnel"": false
+                        },
+                        ""comment"": ""This is a test comment"",
+                        ""comment_modified_on"": ""2024-02-14T00:00:00Z"",
+                        ""tags"": [""test"", ""example""],
+                        ""tags_modified_on"": ""2024-02-14T00:00:00Z"",
+                        ""created_on"": ""2024-02-14T00:00:00Z"",
+                        ""modified_on"": ""2024-02-14T00:00:00Z""
+                    }
+                ],
+                ""success"": true,
+                ""errors"": [],
+                ""messages"": [],
+                ""result_info"": {
+                    ""page"": 1,
+                    ""per_page"": 20,
+                    ""count"": 2,
+                    ""total_count"": 2,
+                    ""total_pages"": 1
+                }
+            }";
+
+        ListRecordsResponse? response = JsonSerializer.Deserialize<ListRecordsResponse>(json);
+
+        Assert.NotNull(response);
+        Assert.Equal(1, response?.ResultInfo.Page);
+        Assert.Equal(20, response?.ResultInfo.PerPage);
+        Assert.Equal(2, response?.ResultInfo.Count);
+        Assert.Equal(2, response?.ResultInfo.TotalCount);
+        Assert.Equal(1, response?.ResultInfo.TotalPages);
     }
 }
