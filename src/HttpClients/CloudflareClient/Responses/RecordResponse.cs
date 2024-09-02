@@ -88,7 +88,7 @@
         /// When the record tags were last modified.
         /// </summary>
         [JsonPropertyName("tags_modified_on")]
-        public DateTimeOffset[]? TagsModifiedOn { get; init; }
+        public DateTimeOffset? TagsModifiedOn { get; init; }
 
         /// <summary>
         /// When the record was created.
