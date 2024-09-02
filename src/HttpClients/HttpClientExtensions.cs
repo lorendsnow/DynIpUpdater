@@ -10,13 +10,16 @@
         /// </summary>
         /// <param name="services">The hostbuilder's IServiceCollection</param>
         /// <returns>an updated services collection with the named HttpClient addded.</returns>
-        public static IServiceCollection AddIpifyClient(this IServiceCollection services)
+        public static IServiceCollection AddIpifyClient(
+            this IServiceCollection services,
+            Uri baseAddress
+        )
         {
             services.AddHttpClient(
                 NamedHttpClients.IpifyFetcher.ToString(),
                 client =>
                 {
-                    client.BaseAddress = new Uri("https://api.ipify.org");
+                    client.BaseAddress = baseAddress;
                 }
             );
 
@@ -30,14 +33,7 @@
         /// <returns>an updated services collection with the named HttpClient addded.</returns>
         public static IServiceCollection AddCloudflareClient(this IServiceCollection services)
         {
-            services.AddHttpClient(
-                NamedHttpClients.CloudflareClient.ToString(),
-                client =>
-                {
-                    client.BaseAddress = new Uri("https://api.cloudflare.com/client/v4");
-                }
-            );
-
+            services.AddHttpClient(NamedHttpClients.CloudflareClient.ToString());
             return services;
         }
     }

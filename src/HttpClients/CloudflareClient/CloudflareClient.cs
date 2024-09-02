@@ -3,26 +3,26 @@ namespace DynIpUpdater
     public class CloudflareClient(
         IHttpClientFactory factory,
         CloudflareConfiguration config,
-        ILogger<CloudflareClient> logger
+        ILogger<CloudflareClient> logger,
+        Uri baseAddress
     ) : ICloudflareClient
     {
         private readonly CloudflareConfiguration _config = config;
         private readonly ILogger<CloudflareClient> _logger = logger;
-        private const string BaseUrl = "https://api.cloudflare.com/client/v4";
-
         public IHttpClientFactory Factory { get; } = factory;
+        public Uri BaseAddress { get; } = baseAddress;
 
-        private HttpClient CreateClient(string zoneId)
+        public HttpClient CreateClient(string zoneId)
         {
             var client = Factory.CreateClient();
             ZoneConfiguration zoneConfig =
                 _config.Zones.FirstOrDefault(z => z.ZoneId == zoneId)
                 ?? throw new ArgumentException($"Zone {zoneId} not found in configuration");
 
+            client.BaseAddress = BaseAddress;
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {zoneConfig.BearerToken}");
             client.DefaultRequestHeaders.Add("X-Auth-Email", zoneConfig.Email);
             client.DefaultRequestHeaders.Add("X-Auth-Key", zoneConfig.ApiKey);
-            client.DefaultRequestHeaders.Add("Content-Type", "application/json");
 
             return client;
         }
@@ -41,14 +41,19 @@ namespace DynIpUpdater
         {
             using var client = CreateClient(request.ZoneId);
             ListRecordsResponse? response = await client.GetFromJsonAsync<ListRecordsResponse>(
-                $"{BaseUrl}/zones/{request.ZoneId}/dns_records?type=A",
+                $"/zones/{request.ZoneId}/dns_records?type=A",
                 cancellationToken
             );
 
             if (response == null)
             {
-                HttpRequestException ex = new($"Failed to get A records for zone {request.ZoneId}");
-                _logger.LogError(ex, "Failed to get A records for zone {ZoneId}", request.ZoneId);
+                HttpRequestException ex =
+                    new($"Got a null response when requesting A recordsfor zone {request.ZoneId}");
+                _logger.LogError(
+                    ex,
+                    "Got a null response when requesting A records for zone {ZoneId}",
+                    request.ZoneId
+                );
                 throw ex;
             }
 
@@ -73,7 +78,7 @@ namespace DynIpUpdater
         {
             using var client = CreateClient(zoneId);
             HttpResponseMessage response = await client.PostAsJsonAsync(
-                $"{BaseUrl}/zones/{zoneId}/dns_records",
+                $"/zones/{zoneId}/dns_records",
                 request,
                 cancellationToken
             );
@@ -117,7 +122,7 @@ namespace DynIpUpdater
         {
             using var client = CreateClient(zoneId);
             HttpResponseMessage response = await client.PutAsJsonAsync(
-                $"{BaseUrl}/zones/{zoneId}/dns_records/{request.Id}",
+                $"/zones/{zoneId}/dns_records/{request.Id}",
                 request,
                 cancellationToken
             );
