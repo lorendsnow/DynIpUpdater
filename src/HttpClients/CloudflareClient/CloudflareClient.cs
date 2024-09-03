@@ -91,10 +91,13 @@ namespace DynIpUpdater
             if (result == null)
             {
                 HttpRequestException ex =
-                    new($"Failed to create record {request.Name} for zone {zoneId}");
+                    new(
+                        $"Got a null response when creating record {request.Name} "
+                            + $"for zone {zoneId}"
+                    );
                 _logger.LogError(
                     ex,
-                    "Failed to create record {RecordName} for zone {ZoneId}",
+                    "Got a null response when creating record {RecordName} for zone {ZoneId}",
                     request.Name,
                     zoneId
                 );
@@ -135,10 +138,13 @@ namespace DynIpUpdater
             if (result == null)
             {
                 HttpRequestException ex =
-                    new($"Failed to update record {request.Id} for zone {zoneId}");
+                    new(
+                        $"Got a null response when updating record {request.Id} "
+                            + $"for zone {zoneId}"
+                    );
                 _logger.LogError(
                     ex,
-                    "Failed to update record {RecordId} for zone {ZoneId}",
+                    "Got a null response when updating record {RecordId} for zone {ZoneId}",
                     request.Id,
                     zoneId
                 );
