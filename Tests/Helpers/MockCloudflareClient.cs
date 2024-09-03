@@ -1,6 +1,7 @@
 ﻿namespace Tests.Helpers
 {
-    public class MockCloudflareClient(ListRecordsResponse aRecordResponse) : ICloudflareClient
+    public class MockCloudflareClientGoodResults(ListRecordsResponse aRecordResponse)
+        : ICloudflareClient
     {
         private readonly ListRecordsResponse _aRecordResponse = aRecordResponse;
 
@@ -80,6 +81,59 @@
                     Errors = [],
                     Messages = [],
                     Success = true,
+                }
+            );
+        }
+    }
+
+    public class MockCloudflareClientBadResults(ListRecordsResponse aRecordResponse)
+        : ICloudflareClient
+    {
+        private readonly ListRecordsResponse _aRecordResponse = aRecordResponse;
+
+        public IHttpClientFactory Factory
+        {
+            get => new DummyClientFactory();
+        }
+
+        public async Task<ListRecordsResponse> GetARecordsAsync(
+            ListARecordsRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            return await Task.FromResult(_aRecordResponse);
+        }
+
+        public async Task<SingleRecordResponse> CreateRecordAsync(
+            CreateDnsRecordRequest request,
+            string zoneId,
+            CancellationToken cancellationToken
+        )
+        {
+            return await Task.FromResult(
+                new SingleRecordResponse()
+                {
+                    Result = null,
+                    Errors = [new() { Code = 1000, Message = "fake error message" }],
+                    Messages = [],
+                    Success = false,
+                }
+            );
+        }
+
+        public async Task<SingleRecordResponse> UpdateRecordAsync(
+            UpdateDnsRecordRequest request,
+            string zoneId,
+            CancellationToken cancellationToken
+        )
+        {
+            return await Task.FromResult(
+                new SingleRecordResponse()
+                {
+                    Result = null,
+                    Errors = [new() { Code = 1000, Message = "fake error message" }],
+                    Messages = [],
+                    Success = false,
                 }
             );
         }
