@@ -14,11 +14,6 @@
 
         public IAddress? CurrentAddress { get; set; }
 
-        public bool AddressSet
-        {
-            get => CurrentAddress is not null;
-        }
-
         public TimeSpan Interval
         {
             get => TimeSpan.FromMinutes(_config.Interval);
@@ -46,7 +41,7 @@
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (!AddressSet)
+                if (CurrentAddress is null)
                 {
                     // Something is wrong - should have been set before entering this loop.
                     InvalidOperationException ex =
