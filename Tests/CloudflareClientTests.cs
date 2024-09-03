@@ -190,6 +190,88 @@
             Assert.Equal(expectedResponse.Result[0].Id, response.Result?[0].Id);
         }
 
+        [Fact]
+        public async Task CreateRecordAsync_ShouldReturnValidResponse()
+        {
+            CloudflareClient client = CreateClient();
+            CreateDnsRecordRequest request =
+                new("123.123.123.123", "example.com", true, null, [], 1);
+            SingleRecordResponse expectedResponse =
+                new()
+                {
+                    Result = new RecordResponse()
+                    {
+                        Id = "12345",
+                        ZoneId = "12345",
+                        ZoneName = "example.com",
+                        Name = "example.com",
+                        Type = "A",
+                        Content = "123.123.123.123",
+                        Proxiable = true,
+                        Proxied = true,
+                        TTL = 1,
+                        Meta = new RecordMeta() { AutoAdded = true, Source = "primary" },
+                        CreatedOn = DateTimeOffset.UtcNow,
+                        ModifiedOn = DateTimeOffset.UtcNow
+                    },
+                    Success = true,
+                    Errors = [],
+                    Messages = []
+                };
+            string jsonResponse = JsonSerializer.Serialize(expectedResponse);
+            _mockHandler?.When("/zones/12345/dns_records").Respond(new StringContent(jsonResponse));
+
+            SingleRecordResponse response = await client.CreateRecordAsync(
+                request,
+                "12345",
+                CancellationToken.None
+            );
+
+            Assert.Equal(expectedResponse.Result.Id, response.Result?.Id);
+        }
+
+        [Fact]
+        public async Task UpdateRecordAsync_ShouldReturnValidResponse()
+        {
+            CloudflareClient client = CreateClient();
+            UpdateDnsRecordRequest request =
+                new("123.123.123.123", "example.com", true, null, "12345", [], 1);
+            SingleRecordResponse expectedResponse =
+                new()
+                {
+                    Result = new RecordResponse()
+                    {
+                        Id = "12345",
+                        ZoneId = "12345",
+                        ZoneName = "example.com",
+                        Name = "example.com",
+                        Type = "A",
+                        Content = "123.123.123.123",
+                        Proxiable = true,
+                        Proxied = true,
+                        TTL = 1,
+                        Meta = new RecordMeta() { AutoAdded = true, Source = "primary" },
+                        CreatedOn = DateTimeOffset.UtcNow,
+                        ModifiedOn = DateTimeOffset.UtcNow
+                    },
+                    Success = true,
+                    Errors = [],
+                    Messages = []
+                };
+            string jsonResponse = JsonSerializer.Serialize(expectedResponse);
+            _mockHandler
+                ?.When("/zones/12345/dns_records/12345")
+                .Respond(new StringContent(jsonResponse));
+
+            SingleRecordResponse response = await client.UpdateRecordAsync(
+                request,
+                "12345",
+                CancellationToken.None
+            );
+
+            Assert.Equal(expectedResponse.Result.Id, response.Result?.Id);
+        }
+
         private CloudflareClient CreateClient()
         {
             _mockHandler = new();
