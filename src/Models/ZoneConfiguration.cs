@@ -6,9 +6,14 @@
     public class ZoneConfiguration
     {
         /// <summary>
-        /// Bearer token associated with this zone.
+        /// Zone Name.
         /// </summary>
-        public required string BearerToken { get; init; }
+        public required string Name { get; init; }
+
+        /// <summary>
+        /// Zone ID associated with this zone.
+        /// </summary>
+        public required string ZoneId { get; init; }
 
         /// <summary>
         /// API key associated with this zone.
@@ -19,11 +24,6 @@
         /// Email associated with this zone.
         /// </summary>
         public required string Email { get; init; }
-
-        /// <summary>
-        /// Zone ID associated with this zone.
-        /// </summary>
-        public required string ZoneId { get; init; }
 
         /// <summary>
         /// List of DNS records to be created and/or updated under this zone.
@@ -38,10 +38,10 @@
         {
             return "ZoneConfiguration "
                 + "{ "
-                + $"BearerToken: {BearerToken} "
+                + $"Name: {Name} "
+                + $"ZoneId: {ZoneId} "
                 + $"ApiKey: {ApiKey} "
                 + $"Email: {Email} "
-                + $"ZoneId: {ZoneId} "
                 + $"DnsRecords: [{string.Join(", ", DnsRecords)}] "
                 + "}";
         }

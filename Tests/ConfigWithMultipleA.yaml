@@ -1,8 +1,10 @@
+Interval: 1
+Verbosity: 1
 Zones:
-- BearerToken: TestBearerToken
-  ApiKey: TestApiKey
-  Email: TestEmail
-  ZoneId: TestZoneId
+- Name: ExampleZone1
+  ZoneId: Zone1ExampleZoneId
+  ApiKey: Zone1ExampleApiKey
+  Email: zone1@example.com
   DnsRecords:
     - Address: null
       Name: example.com
@@ -12,10 +14,28 @@ Zones:
       Tags: []
       TTL: 1
     - Address: null
-      Name: www
+      Name: www.example.com
       Proxied: true
       Comment: null
       Id: null
       Tags: []
       TTL: 1
-Interval: 1
+    - Address: null
+      Name: mysubdomain.example.com
+      Proxied: true
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
+- Name: ExampleZone2
+  ZoneId: Zone2ExampleZoneId
+  ApiKey: Zone2ExampleZoneId
+  Email: zone2@example.com
+  DnsRecords:
+    - Address: null
+      Name: example.com
+      Proxied: true
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
