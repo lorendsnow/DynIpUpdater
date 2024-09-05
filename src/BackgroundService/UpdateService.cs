@@ -29,9 +29,14 @@
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             CurrentAddress = await _addrFetcher.FetchAddressAsync();
+            _logger.LogInformation(
+                "Got current public IP address: {address}",
+                CurrentAddress.Address
+            );
 
-            /* On initialization, we build an inventory of records that will need to be updated.
-             * If the records don't already exist in Cloudflare, we create them.
+            /*
+            On initialization, we build an inventory of records that will need to be updated.
+            If the records don't already exist in Cloudflare, we create them.
             */
             foreach (ZoneConfiguration zone in _config.Zones)
             {
@@ -39,13 +44,20 @@
                 await InitiateRecordsAsync(zone, stoppingToken);
             }
 
+            string message =
+                Interval.TotalMinutes > 1
+                    ? $"checking for IP address changes every {Interval.TotalMinutes} minutes..."
+                    : "checking for IP address changes every minute...";
+            _logger.LogInformation("Initiation complete - {message}", message);
+
             while (!stoppingToken.IsCancellationRequested)
             {
+                await Task.Delay(Interval, stoppingToken);
                 if (CurrentAddress is null)
                 {
                     // Something is wrong - should have been set before entering this loop.
                     InvalidOperationException ex =
-                        new("IP Address was not set before entering loop");
+                        new("IP Address was not set before entering monitoring loop");
                     _logger.LogError(ex, "{message}", ex.Message);
                     throw ex;
                 }
@@ -68,7 +80,6 @@
                         _logger.LogInformation("Records updated successfully");
                     }
                 }
-                await Task.Delay(Interval, stoppingToken);
             }
         }
 
@@ -86,13 +97,23 @@
             CancellationToken stoppingToken
         )
         {
+            _logger.LogInformation(
+                "Initiating records for zone {name}; fetching existing records from Cloudflare",
+                zone.Name
+            );
             List<RecordResponse> existingRecords = await GetExistingRecords(zone, stoppingToken);
+
+            _logger.LogInformation(
+                "Found {count} existing records for zone {name}",
+                existingRecords.Count,
+                zone.Name
+            );
 
             foreach (DnsRecord record in zone.DnsRecords)
             {
                 if (!RecordExists(existingRecords, record))
                 {
-                    _logger.LogDebug(
+                    _logger.LogInformation(
                         "Record {recordName} not found in existing Cloudflare records, attempting "
                             + "to create new record",
                         record.Name
@@ -111,10 +132,6 @@
                 }
                 else
                 {
-                    _logger.LogDebug(
-                        "Record {recordName} already exists in Cloudflare",
-                        record.Name
-                    );
                     Records[zone.ZoneId].Add(record);
                 }
             }
@@ -263,7 +280,7 @@
             {
                 if (record.Id is null)
                 {
-                    _logger.LogError(
+                    _logger.LogWarning(
                         "Record {recordName} does not have an ID, skipping update",
                         record.Name
                     );
@@ -322,7 +339,7 @@
                 );
             }
 
-            if (response.Messages.Length > 0)
+            if (response.Messages?.Length > 0)
             {
                 _logger.LogInformation(
                     "Messages for record {recordName}: {messages}",
