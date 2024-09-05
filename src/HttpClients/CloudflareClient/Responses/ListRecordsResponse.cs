@@ -9,7 +9,7 @@
         /// The records returned by the request.
         /// </summary>
         [JsonPropertyName("result")]
-        public required RecordResponse[]? Result { get; init; }
+        public RecordResponse[]? Result { get; init; }
 
         /// <summary>
         /// Whether the API call was successful
@@ -27,7 +27,7 @@
         /// A list of messages returned by the request.
         /// </summary>
         [JsonPropertyName("messages")]
-        public required ResponseMessage[] Messages { get; init; }
+        public ResponseMessage[]? Messages { get; init; }
 
         /// <summary>
         /// Additional information about the result.
