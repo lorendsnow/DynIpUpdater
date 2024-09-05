@@ -1,0 +1,15 @@
+Zones:
+- Name: ExampleZone1
+  ZoneId: Zone1ExampleZoneId
+  ApiKey: Zone1ExampleApiKey
+  Email: zone1@example.com
+  DnsRecords:
+    - Name: example.com
+    - Name: www.example.com
+    - Name: mysubdomain.example.com
+- Name: ExampleZone2
+  ZoneId: Zone2ExampleZoneId
+  ApiKey: Zone2ExampleZoneId
+  Email: zone2@example.com
+  DnsRecords:
+    - Name: example.com

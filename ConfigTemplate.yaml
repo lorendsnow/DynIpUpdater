@@ -1,0 +1,73 @@
+# Use this as a starting point for the configuration file.
+
+# Number of minutes between checks for address changes.
+# Including this value is optional. If not included, the default value is 5 minutes.
+Interval: 5
+
+# Verbosity of logging/console output.
+# 0: No output
+# 1: Errors only
+# 2: Warnings and above
+# 3: Information and above
+# 4: Information, plus information output from Microsoft and System libraries.
+# Including this value is optional. If not included, the default value is 3.
+Verbosity: 1
+
+# All of the zones to update, and the specific A records within each zone to update.
+Zones:
+  # The name of the zone. This is used for logging/info purposes only.
+- Name: ExampleZone1
+  # The zone ID, which can be found on the overview page of a zone in the Cloudflare dashboard.
+  ZoneId: Zone1ExampleZoneId
+  # The global API key, which can be found in the API settings in the Cloudflare dashboard.
+  ApiKey: Zone1ExampleApiKey
+  # The email address used to log in to the Cloudflare dashboard for this zone.
+  Email: zone1@example.com
+  # The A records to update.
+  DnsRecords:
+    - Name: example.com
+      # Whether or not to use Cloudflare's proxy service.
+      # This field is optional. If not included, the default value is false.
+      Proxied: true
+      # A comment to help identify this record in the Cloudflare dashboard.
+      # This field is optional.
+      Comment: null
+      # The ID of the record. As near as I can tell, this is only available via API responses and 
+      # cannot be found in the dashboard. DynIpUpdater will pull existing records on 
+      # initialization, so this field is optional for existing records. For new records, you may 
+      # specify any string up to 32 characters, or if omitted, DynIpUpdater will generate a random 
+      # GUID when creating the record.
+      Id: null
+      # Tags to apply to the record. This field is optional; tags are for your own reference and 
+      # do not affect DNS functionality.
+      Tags: []
+      # The time to live (TTL) for the record, in seconds. This field is optional; if omitted, 
+      # the default value is 1 (which in turn corresponds to "automatic" in the dashboard).
+      TTL: 1
+    - Name: www.example.com
+      Proxied: true
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
+      # Note that even though in the dashboard you would only specify the name "mysubdomain", the 
+      # api requires the full name, e.g., "mysubdomain.example.com".
+    - Name: mysubdomain.example.com
+      Proxied: true
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
+  # You can have as many zones as you want, from as many accounts as you want. If all your zones 
+  # are under the same account, then the API key and email will be the same for each zone entry.
+- Name: ExampleZone2
+  ZoneId: Zone2ExampleZoneId
+  ApiKey: Zone2ExampleApiKey
+  Email: zone2@example.com
+  DnsRecords:
+    - Name: example.com
+      Proxied: true
+      Comment: null
+      Id: null
+      Tags: []
+      TTL: 1
