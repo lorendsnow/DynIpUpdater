@@ -106,10 +106,6 @@
             HttpClient httpClient = client.CreateClient("12345");
 
             Assert.Equal(
-                "Bearer 12345",
-                httpClient.DefaultRequestHeaders.Authorization?.ToString()
-            );
-            Assert.Equal(
                 "test@example.com",
                 httpClient.DefaultRequestHeaders.GetValues("X-Auth-Email").First()
             );
@@ -179,7 +175,9 @@
                 };
             string jsonResponse = JsonSerializer.Serialize(expectedResponse);
             _mockHandler
-                ?.When($"/zones/{request.ZoneId}/dns_records?type=A")
+                ?.When(
+                    $"https://api.cloudflare.com/client/v4/zones/{request.ZoneId}/dns_records?type=A"
+                )
                 .Respond(new StringContent(jsonResponse));
 
             ListRecordsResponse response = await client.GetARecordsAsync(
@@ -219,7 +217,9 @@
                     Messages = []
                 };
             string jsonResponse = JsonSerializer.Serialize(expectedResponse);
-            _mockHandler?.When("/zones/12345/dns_records").Respond(new StringContent(jsonResponse));
+            _mockHandler
+                ?.When("https://api.cloudflare.com/client/v4/zones/12345/dns_records")
+                .Respond(new StringContent(jsonResponse));
 
             SingleRecordResponse response = await client.CreateRecordAsync(
                 request,
@@ -260,7 +260,7 @@
                 };
             string jsonResponse = JsonSerializer.Serialize(expectedResponse);
             _mockHandler
-                ?.When("/zones/12345/dns_records/12345")
+                ?.When("https://api.cloudflare.com/client/v4/zones/12345/dns_records/12345")
                 .Respond(new StringContent(jsonResponse));
 
             SingleRecordResponse response = await client.UpdateRecordAsync(
@@ -275,7 +275,7 @@
         private CloudflareClient CreateClient()
         {
             _mockHandler = new();
-            Uri baseAddress = new("https://api.cloudflare.com/client/v4");
+            Uri baseAddress = new("https://api.cloudflare.com/client/v4/");
             DnsRecord record1 =
                 new()
                 {
@@ -299,18 +299,18 @@
                     [
                         new ZoneConfiguration()
                         {
-                            BearerToken = "12345",
+                            Name = "Test1",
+                            ZoneId = "12345",
                             ApiKey = "12345",
                             Email = "test@example.com",
-                            ZoneId = "12345",
                             DnsRecords = [record1, record2]
                         },
                         new ZoneConfiguration()
                         {
-                            BearerToken = "54321",
+                            Name = "Test2",
+                            ZoneId = "54321",
                             ApiKey = "12345",
                             Email = "test@example.com",
-                            ZoneId = "54321",
                             DnsRecords = [record1, record2]
                         }
                     ],
