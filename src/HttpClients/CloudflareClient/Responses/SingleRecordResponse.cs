@@ -28,6 +28,6 @@
         /// A list of messages returned by the request.
         /// </summary>
         [JsonPropertyName("messages")]
-        public required ResponseMessage[] Messages { get; init; }
+        public ResponseMessage[]? Messages { get; init; }
     }
 }
