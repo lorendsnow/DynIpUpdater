@@ -20,7 +20,6 @@ namespace DynIpUpdater
                 ?? throw new ArgumentException($"Zone {zoneId} not found in configuration");
 
             client.BaseAddress = BaseAddress;
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {zoneConfig.BearerToken}");
             client.DefaultRequestHeaders.Add("X-Auth-Email", zoneConfig.Email);
             client.DefaultRequestHeaders.Add("X-Auth-Key", zoneConfig.ApiKey);
 
@@ -40,15 +39,20 @@ namespace DynIpUpdater
         )
         {
             using var client = CreateClient(request.ZoneId);
-            ListRecordsResponse? response = await client.GetFromJsonAsync<ListRecordsResponse>(
-                $"/zones/{request.ZoneId}/dns_records?type=A",
+            HttpResponseMessage response = await client.GetAsync(
+                $"zones/{request.ZoneId}/dns_records?type=A",
                 cancellationToken
             );
 
-            if (response == null)
+            ListRecordsResponse? content =
+                await response.Content.ReadFromJsonAsync<ListRecordsResponse>(
+                    cancellationToken: cancellationToken
+                );
+
+            if (content == null)
             {
                 HttpRequestException ex =
-                    new($"Got a null response when requesting A recordsfor zone {request.ZoneId}");
+                    new($"Got a null response when requesting A records for zone {request.ZoneId}");
                 _logger.LogError(
                     ex,
                     "Got a null response when requesting A records for zone {ZoneId}",
@@ -57,7 +61,7 @@ namespace DynIpUpdater
                 throw ex;
             }
 
-            return response;
+            return content;
         }
 
         /// <summary>
@@ -78,7 +82,7 @@ namespace DynIpUpdater
         {
             using var client = CreateClient(zoneId);
             HttpResponseMessage response = await client.PostAsJsonAsync(
-                $"/zones/{zoneId}/dns_records",
+                $"zones/{zoneId}/dns_records",
                 request,
                 cancellationToken
             );
@@ -125,7 +129,7 @@ namespace DynIpUpdater
         {
             using var client = CreateClient(zoneId);
             HttpResponseMessage response = await client.PutAsJsonAsync(
-                $"/zones/{zoneId}/dns_records/{request.Id}",
+                $"zones/{zoneId}/dns_records/{request.Id}",
                 request,
                 cancellationToken
             );
