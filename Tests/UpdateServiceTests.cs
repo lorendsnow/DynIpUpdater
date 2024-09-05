@@ -224,6 +224,8 @@
                 CancellationToken.None,
                 out _
             );
+
+            Assert.True(result);
         }
 
         [Fact]
