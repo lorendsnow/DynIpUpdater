@@ -8,6 +8,7 @@
 	<ServerGarbageCollection>true</ServerGarbageCollection>
 	<PublishTrimmed>False</PublishTrimmed>
 	<PublishAot>False</PublishAot>
+	<InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
