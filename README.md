@@ -6,3 +6,8 @@ If you want to name your config file something different, and/or put it in a dif
 ```
 $ dynipupdater-linux-x64 /path/to/your/configfile.yaml
 ```
+
+Alternatively, there is a docker image you can run:
+```
+$ sudo docker run -d --mount type=bind,src=/full/path/to/your/config.yaml,dst=/app/config.yaml --restart=always lorendsnow/dynipupdater
+```
