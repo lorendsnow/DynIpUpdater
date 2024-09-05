@@ -5,10 +5,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<ServerGarbageCollection>true</ServerGarbageCollection>
-	<PublishTrimmed>False</PublishTrimmed>
-	<PublishAot>False</PublishAot>
-	<InvariantGlobalization>true</InvariantGlobalization>
+	  <ServerGarbageCollection>true</ServerGarbageCollection>
+	  <PublishTrimmed>False</PublishTrimmed>
+	  <PublishAot>False</PublishAot>
+	  <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
